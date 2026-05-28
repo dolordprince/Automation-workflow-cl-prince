@@ -12,36 +12,26 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public/index.html"))
 })
 
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", hf_token_set: !!process.env.HF_API_TOKEN })
+})
+
 app.post("/build", async (req, res) => {
   const prompt = req.body.prompt
 
   if (!prompt) {
-    return res.status(400).json({
-      error: "Prompt required"
-    })
+    return res.status(400).json({ error: "Prompt required" })
   }
 
   exec(`node agents/hermes.js "${prompt}"`, (err, stdout, stderr) => {
-
     if (err) {
-      return res.status(500).json({
-        error: stderr
-      })
+      return res.status(500).json({ error: stderr })
     }
-
-    res.json({
-      success: true,
-      output: stdout
-    })
+    res.json({ success: true, output: stdout })
   })
 })
 
 const PORT = process.env.PORT || 3000
-
 app.listen(PORT, () => {
   console.log(`SERVER RUNNING ON ${PORT}`)
 })
-
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", hf_token_set: !!process.env.HF_API_TOKEN });
-});
