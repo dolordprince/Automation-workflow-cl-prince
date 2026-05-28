@@ -1,0 +1,55 @@
+name: Build & Deploy to Render
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate secrets
+        run: |
+          if [ -z "${{ secrets.HF_API_TOKEN }}" ]; then echo "❌ HF_API_TOKEN missing"; exit 1; fi
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then echo "❌ RENDER_DEPLOY_HOOK missing"; exit 1; fi
+          echo "✅ All secrets present"
+
+      - name: Trigger Render Deploy
+        run: |
+          HTTP_STATUS=$(curl -s -o /tmp/render_out.txt -w "%{http_code}" \
+            -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}")
+          cat /tmp/render_out.txt
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+            echo "✅ Render deploy triggered (HTTP $HTTP_STATUS)"
+          else
+            echo "❌ Render deploy failed (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+
+      - name: Wait for app to come online
+        run: |
+          URL="${{ secrets.NEXT_PUBLIC_APP_URL }}"
+          for i in $(seq 1 24); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
+            echo "Attempt $i/24 — HTTP $STATUS"
+            if [ "$STATUS" = "200" ] || [ "$STATUS" = "301" ]; then
+              echo "✅ App is live at $URL"; exit 0
+            fi
+            sleep 15
+          done
+          echo "⚠️ App did not respond in 6 minutes"; exit 1
