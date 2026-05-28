@@ -1,39 +1,64 @@
 #!/usr/bin/env node
-/**
- * Hermes Agent - AI Code Generator
- * Fixed Ollama integration for ollama@0.5+
- */
+require("dotenv").config();
+const fs = require("fs");
+const path = require("path");
+const { execSync } = require("child_process");
+const ollama = require("ollama");
 
-require('dotenv').config();
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
-
-// âœ… Correct OLLAMA IMPORT - use directly
-const ollama = require('ollama');
-
-const HF_API = process.env.HF_API_KEY ? `https://api-inference.huggingface.co/models/${process.env.HF_MODEL || 'Qwen/Qwen2.5-Coder-32B-Instruct'}` : null;
+const HF_API = process.env.HF_API_KEY ? `https://api-inference.huggingface.co/models/${process.env.HF_MODEL || "Qwen/Qwen2.5-Coder-32B-Instruct"}` : null;
 
 async function callHuggingFace(prompt) {
-  if (!HF_API || !process.env.HF_API_KEY) throw new Error('HF not configured');
+  if (!HF_API || !process.env.HF_API_KEY) throw new Error("HF not configured");
   const res = await fetch(HF_API, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.RTWÒÑV_Xˆ	ĞÛÛ[U\IÎˆ	Ø\XØ][Û‹ÚœÛÛ‰ÂˆKˆ›ÙNˆ”ÓÓ‹œİš[™ÚYJÈ[œ]Îˆ›Û\\˜[Y]\œÎˆÈX^Û™]×İÚÙ[œÎˆŒHJBˆJNÂˆYˆ
-\™\Ë›ÚÊH›İÈ™]È\œ›ÜŠˆ	Ü™\Ëœİ]\ßX
-NÂˆÛÛœİ]HH]ØZ]™\ËšœÛÛŠ
-NÂˆ™]\›ˆ\œ˜^Kš\Ğ\œ˜^J]JHÈ]VÌK™Ù[™\˜]Yİ^ˆ]K™Ù[™\˜]Yİ^ÂŸB‚˜\Ş[˜È[˜İ[ÛˆØ[Û[XJ›Û\
-HÂˆËÈ8§!HÛÜœ™XİTHĞS›ÜˆÛ[XHœHXÚØYÙBˆÛÛœİ™\ÜÛœÙHH]ØZ]Û[XK˜Ú]
-Âˆ[Ù[ˆ›ØÙ\ÜË™[‹“ÓSPWÓSÑS	ÙY\ÙYZË\ŒNŒKX‰ËˆY\ÜØYÙ\ÎˆŞÈ›ÛNˆ	İ\Ù\‰ËÛÛ[ˆ›Û\WKˆİ™X[Nˆ˜[ÙBˆJNÂˆ™]\›ˆ™\ÜÛœÙOË›Y\ÜØYÙOË˜ÛÛ[™\ÜÛœÙOËœ™\ÜÛœÙH	ÉÎÂŸB‚™[˜İ[ÛˆÙ[™\˜]Tİ]XÑ˜[˜XÚÊÜXÊHÂˆ™]\›ˆQĞÕTH[‚[XY]O‰İÜXßOİ]OY]HÚ\œÙ]H]‹NY]H˜[YOHšY]ÜÜˆÛÛ[HÚYY]šXÙK]ÚY[š]X[\ØØ[OLH‚İ[O˜›Ù^Ù›ÛY˜[Z[NœŞ\İ[K]ZKØ[œË\Ù\šYØ˜XÚÙÜ›İ[™›[™X\‹YÜ˜YY[
-LÍYYËÌŒŒXKÌXLXL™JNØÛÛÜˆÙM™M™™ÛX\™Ú[ŒÜY[™ÎŒœ™[_K˜ÛÛZ[™\ÛX^]ÚYŒLŒÛX\™Ú[Œ]]ßKš\›Şİ^X[YÛ˜Ù[\ÜY[™Î™[Hœ™[_Z^Ù›Û\Ú^™NŒ‹\™[NÛX\™Ú[Œ\™[NØ˜XÚÙÜ›İ[™›[™X\‹YÜ˜YY[
-LYËÍØÌØYYÌ˜™
-NË]ÙXšÚ]X˜XÚÙÜ›İ[™XÛ\^Ë]ÙXšÚ]]^Yš[XÛÛÜ˜[œÜ\™[K™\Ú›Ø\™Ø˜XÚÙÜ›İ[™ˆÌYLYLÙØ›Ü™\‹\˜Y]\ÎŒ\™[NÜY[™ÎŒœ™[NÛX\™Ú[‹]ÜŒœ™[NØ›Ş\ÚYİÎŒL™Ø˜JŒÊJ_OÜİ[OÚXY‚›ÙO]ˆÛ\ÜÏH˜ÛÛZ[™\ˆ]ˆÛ\ÜÏHš\›ÈO¸§'ˆ	İÜXßOÚORKYÙ[™\˜]Y™[Z][H[\]H8 (ˆ˜[˜XÚÈ[ÙOÜÙ]]ˆÛ\ÜÏH™\Ú›Ø\™Ï¼'äêˆ\Ú›Ø\™™]šY]ÏÚÏÛÛ[Ù[™\˜]YÚ]İ]XÈ˜[˜XÚËˆÛÛ™šYİ\™HÛ[XKÒˆ›Üˆ[˜[ZXÈRKÜÙ]Ù]Ø›ÙOÚ[˜ßB‚˜\Ş[˜È[˜İ[ÛˆXZ[Š
-HÂˆÛÛœİÜXÈH›ØÙ\ÜË˜\™İ–Ì—H	ĞRHÙXˆ\XØ][Û‰ÎÂˆÛÛœÛÛK›ÙÊ<'ãåÈ“Ò‘PÕˆ	İÜXßX
-NÂˆˆÛÛœİ›Û\HÙ[™\˜]HHÚ[™ÛKYš[HS[™[™ÈYÙH›Üˆ‰İÜXßH‹ˆ’[˜ÛYNˆ[Ù\›ˆ\šÈ^\H\ÚYÛ‹Ü˜YY[XØÙ[Ë™\ÜÛœÚ]™H^[İ]™\Ú›Ø\™™]šY]ÈÙXİ[Û‹ÕH]ÛœË[™[›[™HÔÔËˆ›È^\›˜[\[™[˜ÚY\Ëˆ“İ]]Ó“H˜[YS›ÈX\šÙİÛ‹›È^[˜][ÛœË˜Â‚ˆ][H	ÉÎÂˆˆËÈHYÙÚ[™Ñ˜XÙHš\œİ
-YˆÛÛ™šYİ\™Y
-BˆHÂˆÛÛœÛÛK›ÙÊ	ğãåÈZ[™ÈYÙÚ[™Ñ˜XÙK‹‹‰ÊNÂˆ[H]ØZ]Ø[YÙÚ[™Ñ˜XÙJ›Û\
-NÂˆHØ]Ú
-‘\œŠHÂˆÛÛœÛÛKØ\›Š8§ãÈˆRSQˆ	Ú‘\œ‹›Y\ÜØYÙ_X
-NÂˆBˆˆËÈ˜[˜XÚÈÈÛ[XBˆYˆ
-Z[[›[™İL
-HÂˆHÂˆ
+    method: "POST",
+    headers: { "Authorization": `Bearer ${process.env.HF_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ inputs: prompt, parameters: { max_new_tokens: 2048 } })
+  });
+  if (!res.ok) throw new Error(`HF ${res.status}`);
+  const data = await res.json();
+  return Array.isArray(data) ? data[0].generated_text : data.generated_text;
+}
+
+async function callOllama(prompt) {
+  const response = await ollama.chat({
+    model: process.env.OLLAMA_MODEL || "deepseek-r1:1.5b",
+    messages: [{ role: "user", content: prompt }],
+    stream: false
+  });
+  return response?.message?.content || response?.response || "";
+}
+
+function generateStaticFallback(topic) {
+  return `<!DOCTYPE html><html><head><title>${topic}</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:system-ui,sans-serif;background:linear-gradient(135deg,#0f0f1a,#1a1a2e);color:#e6e6ff;margin:0;padding:2rem}.container{max-width:1200px;margin:0 auto}.hero{text-align:center;padding:4rem 2rem}h1{font-size:2.5rem;margin:0 0 1rem;background:linear-gradient(90deg,#7c3aed,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.dashboard{background:#1e1e3f;border-radius:1rem;padding:2rem;margin-top:2rem;box-shadow:0 10px 40px rgba(0,0,0,.3)}</style></head><body><div class="container"><div class="hero"><h1>âœ¨ ${topic}</h1><p>AI-generated premium template â€¢ Fallback mode</p></div><div class="dashboard"><h3>ğŸ“Š Dashboard Preview</h3><p>Content generated with static fallback. Configure Ollama/HF for dynamic AI.</p></div></div></body></html>`;
+}
+
+async function main() {
+  const topic = process.argv[2] || "AI Web Application";
+  console.log(`ğŸ—ï¸  PROJECT: ${topic}`);
+  const prompt = `Generate a single-file HTML landing page for: "${topic}". Include: modern dark luxury design, gradient accents, responsive layout, dashboard preview section, CTA buttons, and inline CSS. No external dependencies. Output ONLY valid HTML, no markdown, no explanations.`;
+  let html = "";
+  try { console.log("ğŸ¤– Trying HuggingFace..."); html = await callHuggingFace(prompt); } 
+  catch (hfErr) { console.warn(`âš ï¸  HF FAILED: ${hfErr.message}`); }
+  if (!html || html.length < 100) {
+    try { console.log("ğŸ”„ Falling back to Ollama..."); html = await callOllama(prompt); } 
+    catch (ollamaErr) { console.warn(`âš ï¸  OLLAMA FAILED: ${ollamaErr.message}`); }
+  }
+  if (!html || !html.trim().startsWith("<")) {
+    console.warn("âš ï¸  AI returned invalid HTML. Using premium fallback template.");
+    html = generateStaticFallback(topic);
+  }
+  const outDir = path.join(process.cwd(), "generated", topic.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""));
+  fs.mkdirSync(outDir, { recursive: true });
+  fs.writeFileSync(path.join(outDir, "index.html"), html, "utf8");
+  console.log("âœ… FILES GENERATED");
+  console.log(`ğŸ“ Output: ${outDir}/index.html`);
+  if (process.env.AUTO_PUSH === "true" && process.env.GITHUB_TOKEN) {
+    try {
+      console.log("ğŸ“¤ PUSHING TO GITHUB...");
+      execSync("git add -A", { stdio: "ignore" });
+      execSync(`git commit -m "chore: generate ${topic}" || true`, { stdio: "ignore" });
+      execSync("git push", { stdio: "ignore" });
+    } catch (e) {}
+  }
+}
+main().catch(err => { console.error("âŒ Agent error:", err.message); process.exit(1); });
