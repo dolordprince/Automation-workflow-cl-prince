@@ -1,20 +1,13 @@
 {
-  "name": "luxury-fintech-saas-landing-page-with-dashboard",
+  "name": "prince-code-cli",
   "version": "1.0.0",
-  "description": "AI-generated luxury fintech SaaS landing page with dashboard",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "agent": "node agents/hermes.js"
+  "description": "Claude-style AI engineering interface",
+  "main": "agents/hermes.js",
+  "bin": {
+    "ai": "./ai"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "axios": "^1.16.1",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "ollama": "^0.6.3",
-    "simple-git": "^3.36.0"
+    "dotenv": "^16.4.5",
+    "ollama": "^0.5.1"
   }
 }
