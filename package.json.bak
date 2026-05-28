@@ -1,0 +1,7 @@
+"scripts": {
+  "start": "node server.js",
+  "dev": "node server.js",
+  "worker": "node worker.js",
+  "cluster": "node cluster.js",
+  "hermes": "node agents/hermes.js"
+}
