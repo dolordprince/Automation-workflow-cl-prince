@@ -1,7 +1,14 @@
-"scripts": {
-  "start": "node server.js",
-  "dev": "node server.js",
-  "worker": "node worker.js",
-  "cluster": "node cluster.js",
-  "hermes": "node agents/hermes.js"
+{
+  "name": "luxury-fintech-saas-landing-page-with-dashboard",
+  "version": "1.0.0",
+  "description": "AI-generated luxury fintech SaaS landing page with dashboard",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "agent": "node agents/hermes.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {}
 }
