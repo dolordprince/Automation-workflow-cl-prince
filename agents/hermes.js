@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 require('dotenv').config();
-const fs = require('path') ? require('fs') : require('fs');
+const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const { Ollama } = require('ollama');
@@ -22,7 +22,33 @@ async function callOllama(prompt) {
 }
 
 function generateStaticFallback(topic) {
-  return `<!DOCTYPE html><html><head><title>${topic}</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:system-ui,sans-serif;background:linear-gradient(135deg,#0f0f1a,#1a1a2e);color:#e6e6ff;margin:0;padding:2rem}.container{max-width:1200px;margin:0 auto}.hero{text-align:center;padding:4rem 2rem}h1{font-size:2.5rem;margin:0 0 1rem;background:linear-gradient(90deg,#7c3aed,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.dashboard{background:#1e1e3f;border-radius:1rem;padding:2rem;margin-top:2rem;box-shadow:0 10px 40px rgba(0,0,0,.3)}</style></head><body><div class="container"><div class="hero"><h1>✨ ${topic}</h1><p>Premium System Template • Generated via Failover Engine</p></div><div class="dashboard"><h3>📊 Dashboard Preview</h3><p>Content generated with static fallback. Verify Ollama initialization status.</p></div></div></body></html>`;
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <title>${topic}</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family:system-ui,sans-serif;background:linear-gradient(135deg,#0f0f1a,#1a1a2e);color:#e6e6ff;margin:0;padding:2rem}
+    .container{max-width:1200px;margin:0 auto}
+    .hero{text-align:center;padding:4rem 2rem}
+    h1{font-size:2.5rem;margin:0 0 1rem;background:linear-gradient(90deg,#7c3aed,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .dashboard{background:#1e1e3f;border-radius:1rem;padding:2rem;margin-top:2rem;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>✨ ${topic}</h1>
+      <p>Premium System Template • Generated via Failover Engine</p>
+    </div>
+    <div class="dashboard">
+      <h3>📊 Dashboard Preview</h3>
+      <p>Content generated with static fallback. Verify Ollama initialization status.</p>
+    </div>
+  </div>
+</body>
+</html>`;
 }
 
 async function main() {
@@ -36,7 +62,6 @@ async function main() {
   console.log("🔄 Contacting Ollama Node controller...");
   html = await callOllama(prompt);
   
-  // Strip out markdown formatting wrapping blocks if deepseek accidental outputs it
   if (html.includes("```html")) {
     html = html.split("```html")[1].split("```")[0];
   } else if (html.includes("```")) {
