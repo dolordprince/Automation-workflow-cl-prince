@@ -1,5 +1,5 @@
 #!/bin/bash
-# Hermes Agent CLI Wrapper
+# Hermes CLI Wrapper
 set -e
 cd "$(dirname "$0")"
 node agents/hermes.js "$@"
