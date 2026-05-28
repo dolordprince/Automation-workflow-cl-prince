@@ -1,27 +1,43 @@
-const express = require("express");
-const path = require("path");
+const express = require("express")
+const path = require("path")
+const { exec } = require("child_process")
 
-const app = express();
+const app = express()
 
-const PUBLIC_DIR = path.join(__dirname, "public");
+app.use(express.json())
+app.use(express.static("public"))
+app.use("/admin", express.static("admin"))
 
-app.use(express.static(PUBLIC_DIR));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public/index.html"))
+})
 
-app.get("/admin", (req, res) => {
-  res.sendFile(path.join(PUBLIC_DIR, "../admin/index.html"));
-});
+app.post("/build", async (req, res) => {
+  const prompt = req.body.prompt
 
-app.get("/health", (req, res) => {
-  res.json({ status: "ok", uptime: process.uptime() });
-});
+  if (!prompt) {
+    return res.status(400).json({
+      error: "Prompt required"
+    })
+  }
 
-const PORT = process.env.PORT || 3000;
+  exec(`node agents/hermes.js "${prompt}"`, (err, stdout, stderr) => {
 
-const server = app.listen(PORT, () => {
-  console.log("SERVER_RUNNING:", PORT);
-});
+    if (err) {
+      return res.status(500).json({
+        error: stderr
+      })
+    }
 
-process.on("SIGINT", () => {
-  console.log("SHUTDOWN");
-  server.close(() => process.exit(0));
-});
+    res.json({
+      success: true,
+      output: stdout
+    })
+  })
+})
+
+const PORT = process.env.PORT || 3000
+
+app.listen(PORT, () => {
+  console.log(`SERVER RUNNING ON ${PORT}`)
+})

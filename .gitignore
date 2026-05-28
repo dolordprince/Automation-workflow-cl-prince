@@ -1,4 +1,9 @@
-node_modules/
+node_modules
 .env
-data/
+dump.rdb
+dist
+build
+coverage
+.next
+.cache
 *.log
