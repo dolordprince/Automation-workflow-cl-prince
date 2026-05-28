@@ -1,10 +1,10 @@
 services:
   - type: web
     name: prince-ai-platform
-    runtime: node
-    buildCommand: npm install
-    startCommand: node server.js
+    env: node
     plan: free
+    buildCommand: npm install
+    startCommand: npm start
     autoDeploy: true
 
     envVars:
