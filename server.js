@@ -41,3 +41,7 @@ const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
   console.log(`SERVER RUNNING ON ${PORT}`)
 })
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", hf_token_set: !!process.env.HF_API_TOKEN });
+});
